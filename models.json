@@ -1,3 +1,12 @@
 {
-  "models": []
+  "models": [
+    {
+      "id": "altec-speaker-cabinet",
+      "name": "Altec Speaker Cabinet",
+      "description": "Modelo 3D texturizado de un gabinete de altavoz Altec, exportado desde Meshy AI.",
+      "format": "glb",
+      "size": 24465144,
+      "url": "./models/altec-speaker.glb"
+    }
+  ]
 }
