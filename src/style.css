@@ -12,6 +12,11 @@ button:disabled{opacity:.5;cursor:default}
 .load-button{flex:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid #45494d;background:#ecefea;color:#131916;border-radius:7px;min-height:42px;padding:10px 15px;font-size:12px;font-weight:700;transition:.2s}
 .load-button svg{width:15px;height:15px}
 .load-button:hover{background:#fff}
+.rotate-button{flex:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid #42464b;background:#24272d;color:#bec3c8;border-radius:7px;min-height:42px;padding:10px 13px;font-size:12px;font-weight:600;transition:background .2s,border-color .2s,color .2s}
+.rotate-button svg{width:17px;height:17px}
+.rotate-button:hover{background:#34383f;color:#fff}
+.rotate-button[aria-pressed="true"]{background:#34443a;color:#d5eddd;border-color:#769783}
+.rotate-button[aria-pressed="true"] svg{color:#b6e0c2}
 .model-list{min-width:0;flex:1;display:flex;overflow-x:auto;align-items:center;gap:8px;scrollbar-width:thin;scrollbar-color:#454a4b transparent;padding:3px 0}
 .model-row{flex:none;display:flex;align-items:center;gap:9px;max-width:250px;min-height:38px;background:#24262b;color:#a5aab0;border:1px solid #35383d;border-radius:6px;padding:8px 13px;text-align:left;transition:background .15s,border-color .15s,color .15s}
 .model-row:hover{background:#31343a;color:#eee}
@@ -51,6 +56,9 @@ button:disabled{opacity:.5;cursor:default}
  .topbar{min-height:76px;padding:9px 11px;gap:8px;flex-wrap:wrap}
  .top-brand{font-size:11px;padding-right:3px}
  .load-button{min-height:34px;padding:7px 8px;font-size:10px}
+ .rotate-button{min-height:34px;padding:7px 8px;font-size:10px}
+ .rotate-button svg{width:15px;height:15px}
+ .rotate-button span{display:none}
  .model-list{order:4;flex-basis:100%;height:37px;padding:0 0 2px}
  .model-row{min-height:31px;padding:5px 9px;max-width:175px}
  .model-label{font-size:10px}
