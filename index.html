@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#101114">
   <title>RICOS · 3D VIEWER</title>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./src/style.css?v=dark-v1">
+  <link rel="stylesheet" href="./src/style.css?v=rotate-v1">
   <script type="importmap">
   {
     "imports": {
@@ -15,8 +15,8 @@
     }
   }
   </script>
-  <link rel="modulepreload" href="./src/viewer-core.js">
-  <script type="module" src="./src/main.js?v=dark-v2"></script>
+  <link rel="modulepreload" href="./src/viewer-core.js?v=rotate-v1">
+  <script type="module" src="./src/main.js?v=rotate-v1"></script>
 </head>
 <body>
   <main class="shell">
@@ -25,6 +25,12 @@
       <button type="button" class="load-button" id="loadButton">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M12 4v16M4 12h16"/></svg>
         Cargar modelo local
+      </button>
+      <button type="button" id="rotateButton" class="rotate-button" aria-pressed="false" title="Activar rotación automática">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12a9 9 0 1 1-2.6-6.4M21 3v6h-6"/>
+        </svg>
+        <span>Rotación automática</span>
       </button>
       <input id="fileInput" type="file" accept=".glb,.obj,.stl" hidden>
       <nav class="model-list" id="modelList" aria-label="Modelos guardados"></nav>
