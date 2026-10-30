@@ -5,6 +5,9 @@ const MAX_UPLOAD_BYTES=50*1024*1024;
 const EXTENSIONS=new Set(['glb','obj','stl']);
 const $=id=>document.getElementById(id);
 const state={saved:[],local:null,activeId:null,localUrl:null,viewer:null,viewerPending:null,loadingId:0,uploading:false};
+const OPTIMIZED_PATH='models/altec-speaker-optimizado.glb';
+const ORIGINAL_PATH='models/altec-speaker.glb';
+const staticModel=(path)=>({id:path,name:'Altec Speaker Cabinet',ext:'glb',bytes:0,url:new URL('./'+path,document.baseURI).href,local:false});
 const format=name=>(name?.split('.').pop()||'').toLowerCase();
 const modelName=path=>{
  const filename=path.split('/').pop()||path;
@@ -50,7 +53,7 @@ async function restoreLocalPreview(){
   }
  }catch(err){console.warn('Vista previa local no encontrada',err)}
 }
-const cubeIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linejoin="round"><path d="M12 2 21 7v10l-9 5-9-5V7l9-5Z M3 7l9 5 9-5 M12 12v10"/></svg>';
+
 function notify(message,delay=5500){
  const toast=$('toast');
  toast.textContent=message;
@@ -81,14 +84,11 @@ function drawList(){
    const button=document.createElement('button');
    button.type='button';
    button.className='model-row'+(state.activeId===model.id?' is-active':'');
-   const thumb=document.createElement('span');
-   thumb.className='model-thumb';
-   thumb.innerHTML=cubeIcon;
    const label=document.createElement('span');
    label.className='model-label';
    label.textContent=model.name;
    if(model.local){const mark=document.createElement('small');mark.className='model-local-mark';mark.textContent='LOCAL';label.appendChild(mark)}
-   button.append(thumb,label);
+   button.append(label);
    button.addEventListener('click',()=>select(model));
    host.appendChild(button);
  }
@@ -126,9 +126,12 @@ async function loadSaved({pickInitial=true}={}){
   });
   if(!response.ok)throw new Error('Respuesta de GitHub: '+response.status);
   const entries=await response.json();
-  state.saved=entries.filter(x=>x.type==='file'&&EXTENSIONS.has(format(x.name))).map(x=>({
+  const candidates=entries.filter(x=>x.type==='file'&&EXTENSIONS.has(format(x.name)));
+  const hasFast=candidates.some(x=>x.path===OPTIMIZED_PATH);
+  state.saved=candidates.filter(x=>!(hasFast&&x.path===ORIGINAL_PATH)).map(x=>({
    id:x.path,name:modelName(x.path),ext:format(x.name),bytes:x.size,
-   url:'https://raw.githubusercontent.com/'+REPO+'/'+BRANCH+'/'+x.path,local:false
+   // Same-origin Pages CDN means one cache and no unnecessary cross-origin model requests.
+   url:new URL('./'+x.path,document.baseURI).href,local:false
   })).sort((a,b)=>a.name.localeCompare(b.name,'es'));
  }catch(error){
   console.warn('Error consultando modelos públicos:',error);
@@ -250,7 +253,23 @@ $('publishForm').addEventListener('submit',async event=>{
    state.uploading=false;button.disabled=false;button.textContent='Guardar modelo';
  }
 });
-// If no publicly published models exist, restore the most recent local preview.
-// Public models in /models take precedence on a new visitor's first visit.
-loadSaved().then(async()=>{if(!state.saved.length && !state.local)await restoreLocalPreview()});
+// Start Three.js download immediately, without waiting for the GitHub API.
 getViewer().catch(()=>{});
+// Load Altec from GitHub Pages itself. Optimized model is preferred if uploaded.
+(async()=>{
+ const requested=new URL(location.href).searchParams.get('model');
+ const libraryPromise=loadSaved({pickInitial:false});
+ if(requested&&!([ORIGINAL_PATH,OPTIMIZED_PATH].includes(requested))){
+   await libraryPromise;
+   const chosen=state.saved.find(x=>x.id===requested);
+   if(chosen){await select(chosen);return}
+ }
+ let initialPath=ORIGINAL_PATH;
+ try{
+   const res=await fetch('./'+OPTIMIZED_PATH,{method:'HEAD',cache:'default'});
+   if(res.ok)initialPath=OPTIMIZED_PATH;
+ }catch(error){console.warn('Model optimization detection:',error)}
+ await select(staticModel(initialPath));
+ await libraryPromise;
+ if(!state.saved.length && !state.local)await restoreLocalPreview();
+})().catch(error=>console.error('Could not initialize gallery',error));
