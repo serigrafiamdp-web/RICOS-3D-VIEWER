@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#f7f7f5">
+  <meta name="theme-color" content="#101114">
   <title>RICOS · 3D VIEWER</title>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./src/style.css?v=fix-3">
+  <link rel="stylesheet" href="./src/style.css?v=dark-v1">
   <script type="importmap">
   {
     "imports": {
@@ -15,33 +15,29 @@
     }
   }
   </script>
-  <script type="module" src="./src/main.js?v=altec-public-1"></script>
+  <script type="module" src="./src/main.js?v=dark-v1"></script>
 </head>
 <body>
   <main class="shell">
-    <aside class="library" aria-label="Biblioteca de modelos guardados">
-      <div class="library-top">
-        <div class="brand" aria-label="RICOS 3D">
-          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round" aria-hidden="true">
-            <path d="M16 3 28 10v13L16 30 4 23V10L16 3Z" />
-            <path d="M4 10 16 17l12-7M16 17v13" />
-          </svg>
-        </div>
-        <button type="button" class="load-button" id="loadButton">Cargar modelo local</button>
-        <input id="fileInput" type="file" accept=".glb,.obj,.stl" hidden>
-      </div>
-      <div id="modelList" class="model-list" aria-live="polite"></div>
-      <div class="library-bottom"><span id="modelCounter" aria-label="Cantidad de modelos">00</span></div>
-    </aside>
+    <header class="topbar" aria-label="Controles y modelos">
+      <span class="top-brand" aria-label="Ricos 3D Viewer">RICOS<span class="brand-suffix">/ 3D</span></span>
+      <button type="button" class="load-button" id="loadButton">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M12 4v16M4 12h16"/></svg>
+        Cargar modelo local
+      </button>
+      <input id="fileInput" type="file" accept=".glb,.obj,.stl" hidden>
+      <nav class="model-list" id="modelList" aria-label="Modelos guardados"></nav>
+      <span id="modelCounter" class="counter" aria-label="Número de modelos">00</span>
+      <button id="saveButton" type="button" class="save-button" title="Guardar modelo en GitHub" aria-label="Guardar modelo en GitHub" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M12 16V4m-4 4 4-4 4 4M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+        <span>Guardar</span>
+      </button>
+    </header>
     <section class="view" id="view" aria-label="Visor 3D">
       <div id="viewport" class="viewport"></div>
-      <div id="busy" class="busy" role="status" aria-live="polite" hidden><div class="loader"></div></div>
-      <button id="saveButton" type="button" class="save-button" title="Guardar modelo en GitHub" aria-label="Guardar modelo en GitHub" hidden>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12 16V4m-4 4 4-4 4 4M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
-        </svg>
-      </button>
-      <div class="control-hint" id="controlHint" aria-hidden="true"></div>
+      <div id="busy" class="busy" role="status" aria-label="Cargando modelo" hidden>
+        <div class="loader"></div>
+      </div>
     </section>
   </main>
 
