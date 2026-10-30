@@ -8,7 +8,7 @@ const state={saved:[],local:null,activeId:null,localUrl:null,viewer:null,viewerP
 const format=name=>(name?.split('.').pop()||'').toLowerCase();
 const modelName=path=>{
  const filename=path.split('/').pop()||path;
- if(filename.toLowerCase()==='altec-speaker.glb')return 'Altec Speaker Cabinet';
+ if(/altec/i.test(filename))return 'Altec Speaker Cabinet';
  return filename.replace(/\.(glb|obj|stl)$/i,'').replace(/[-_]+/g,' ').trim();
 };
 // Record the most recent local model for automatic preview on this device.
@@ -150,7 +150,7 @@ async function loadSaved({pickInitial=true}={}){
  if(pickInitial&&!state.local){
   const requested=new URL(location.href).searchParams.get('model');
   const initial=state.saved.find(x=>x.id===requested)
-   ||state.saved.find(x=>x.id==='models/altec-speaker.glb')||state.saved[0];
+   ||state.saved.find(x=>/altec/i.test(x.name))||state.saved[0];
   if(initial)select(initial);
  }
 }
