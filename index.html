@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#f7f7f5">
   <title>RICOS · 3D VIEWER</title>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./src/style.css?v=fix-2">
+  <link rel="stylesheet" href="./src/style.css?v=fix-3">
   <script type="importmap">
   {
     "imports": {
@@ -15,7 +15,7 @@
     }
   }
   </script>
-  <script type="module" src="./src/main.js?v=fix-2"></script>
+  <script type="module" src="./src/main.js?v=fix-3"></script>
 </head>
 <body>
   <main class="shell">
@@ -35,9 +35,6 @@
     </aside>
     <section class="view" id="view" aria-label="Visor 3D">
       <div id="viewport" class="viewport"></div>
-      <div class="center-mark" id="centerMark" aria-hidden="true">
-        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M32 7 54 19.5v25L32 57 10 44.5v-25L32 7Z"/><path d="M10 19.5 32 32l22-12.5M32 32v25"/></svg>
-      </div>
       <div id="busy" class="busy" role="status" aria-live="polite" hidden><div class="loader"></div></div>
       <button id="saveButton" type="button" class="save-button" title="Guardar modelo en GitHub" aria-label="Guardar modelo en GitHub" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
