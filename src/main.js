@@ -4,7 +4,7 @@ const BRANCH='main';
 const MAX_UPLOAD_BYTES=50*1024*1024;
 const EXTENSIONS=new Set(['glb','obj','stl']);
 const $=id=>document.getElementById(id);
-const state={saved:[],local:null,activeId:null,localUrl:null,viewer:null,viewerPending:null,loadingId:0,uploading:false};
+const state={saved:[],local:null,activeId:null,localUrl:null,viewer:null,viewerPending:null,loadingId:0,uploading:false,autoRotate:false};
 const OPTIMIZED_PATH='models/altec-speaker-optimizado.glb';
 const ORIGINAL_PATH='models/altec-speaker.glb';
 const staticModel=(path)=>({id:path,name:'Altec Speaker Cabinet',ext:'glb',bytes:0,url:new URL('./'+path,document.baseURI).href,local:false});
@@ -64,8 +64,9 @@ function notify(message,delay=5500){
 async function getViewer(){
  if(state.viewer)return state.viewer;
  if(state.viewerPending)return state.viewerPending;
- state.viewerPending=import('./viewer-core.js').then(mod=>{
+ state.viewerPending=import('./viewer-core.js?v=rotate-v1').then(mod=>{
    const engine=mod.initialize($('viewport'));
+   engine.setAutoRotate(state.autoRotate);
    state.viewer=engine;
    return engine;
  }).catch(error=>{
@@ -171,6 +172,13 @@ function acceptFile(file,fileName=file?.name,persist=true){
  if(persist)saveLocalPreview(named);
  select(state.local);
 }
+$('rotateButton').addEventListener('click',()=>{
+  state.autoRotate=!state.autoRotate;
+  const button=$('rotateButton');
+  button.setAttribute('aria-pressed',String(state.autoRotate));
+  button.title=state.autoRotate?'Desactivar rotación automática':'Activar rotación automática';
+  if(state.viewer)state.viewer.setAutoRotate(state.autoRotate);
+});
 $('loadButton').addEventListener('click',()=>{
  $('fileInput').value='';
  $('fileInput').click();
