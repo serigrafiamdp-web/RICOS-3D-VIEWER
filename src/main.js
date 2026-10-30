@@ -128,7 +128,7 @@ async function loadModels(){
  }
  try{
   const response=await fetch('./models.json',{cache:'no-store'});
-  if(response.ok){const data=await response.json();state.staticModels=(data.models||[]).filter(m=>ALLOWED.has(m.format)).map(m=>({...m,static:true,url:new URL(m.url,document.baseURI).href}))}
+  if(response.ok){const data=await response.json();const models=(data.models||[]).filter(m=>ALLOWED.has(m.format)).map(m=>({...m,static:true,url:new URL(m.url,document.baseURI).href}));state.staticModels=(await Promise.all(models.map(async m=>{try{const res=await fetch(m.url,{method:'HEAD'});return res.ok?m:null}catch{return null}}))).filter(Boolean)}
  }catch(e){console.warn('Sin manifiesto de modelos locales',e)}
  renderList();
  const requested=new URLSearchParams(window.location.search).get('model');
