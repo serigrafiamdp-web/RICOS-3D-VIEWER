@@ -11,6 +11,45 @@ const modelName=path=>{
  if(filename.toLowerCase()==='altec-speaker.glb')return 'Altec Speaker Cabinet';
  return filename.replace(/\.(glb|obj|stl)$/i,'').replace(/[-_]+/g,' ').trim();
 };
+// Record the most recent local model for automatic preview on this device.
+// This is a browser copy, NOT a publicly published file.
+const DB_NAME='ricos-3d-preview',STORE='latest';
+function openLocalStore(){
+ return new Promise((resolve,reject)=>{
+  if(!('indexedDB' in window))return reject(new Error('IndexedDB not supported'));
+  const request=indexedDB.open(DB_NAME,1);
+  request.onupgradeneeded=()=>{request.result.createObjectStore(STORE)};
+  request.onsuccess=()=>resolve(request.result);
+  request.onerror=()=>reject(request.error);
+ });
+}
+async function saveLocalPreview(file){
+ try{
+  const db=await openLocalStore();
+  await new Promise((resolve,reject)=>{
+   const tx=db.transaction(STORE,'readwrite');
+   tx.objectStore(STORE).put(file,'last-file');
+   tx.oncomplete=resolve;
+   tx.onerror=()=>reject(tx.error);
+  });
+  db.close();
+ }catch(err){console.warn('Vista previa local no persistida',err)}
+}
+async function restoreLocalPreview(){
+ try{
+  const db=await openLocalStore();
+  const file=await new Promise((resolve,reject)=>{
+   const req=db.transaction(STORE,'readonly').objectStore(STORE).get('last-file');
+   req.onsuccess=()=>resolve(req.result);
+   req.onerror=()=>reject(req.error);
+  });
+  db.close();
+  if(file instanceof Blob){
+   const name=file.name||'modelo.glb';
+   acceptFile(file,name,false);
+  }
+ }catch(err){console.warn('Vista previa local no encontrada',err)}
+}
 const cubeIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linejoin="round"><path d="M12 2 21 7v10l-9 5-9-5V7l9-5Z M3 7l9 5 9-5 M12 12v10"/></svg>';
 function notify(message,delay=5500){
  const toast=$('toast');
@@ -67,7 +106,7 @@ async function select(model,options={}){
      if(id!==state.loadingId)return;
      const visible=await viewer.open(model);
      if(id!==state.loadingId)return;
-     $('centerMark').classList.toggle('is-hidden',!visible);
+
    }catch(error){
      console.error('No se pudo cargar el 3D:',error);
      if(id===state.loadingId)notify('No se pudo visualizar el archivo. Revisá la consola para más detalles.');
@@ -115,15 +154,18 @@ async function loadSaved({pickInitial=true}={}){
   if(initial)select(initial);
  }
 }
-function acceptFile(file){
+function acceptFile(file,fileName=file?.name,persist=true){
  if(!file)return;
- const ext=format(file.name);
+ const ext=format(fileName);
  if(!EXTENSIONS.has(ext)){notify('Elegí un archivo GLB, OBJ o STL.');return}
  // Replace the previous local preview, leaving remote files intact.
  if(state.localUrl)URL.revokeObjectURL(state.localUrl);
  state.localUrl=URL.createObjectURL(file);
- const name=file.name.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
- state.local={id:'local-'+crypto.randomUUID(),name,ext,bytes:file.size,url:state.localUrl,file,local:true};
+ const name=/altec/i.test(fileName)?'Altec Speaker Cabinet':fileName.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
+ // Stored Blobs can lose the File.name property in some browsers.
+ const named=file.name?file:new File([file],fileName,{type:file.type||'model/gltf-binary'});
+ state.local={id:'local-'+crypto.randomUUID(),name,ext,bytes:file.size,url:state.localUrl,file:named,local:true};
+ if(persist)saveLocalPreview(named);
  select(state.local);
 }
 $('loadButton').addEventListener('click',()=>{
@@ -208,6 +250,7 @@ $('publishForm').addEventListener('submit',async event=>{
    state.uploading=false;button.disabled=false;button.textContent='Guardar modelo';
  }
 });
-// Populate library independently of the renderer so failures cannot disable file selection.
-loadSaved();
+// If no publicly published models exist, restore the most recent local preview.
+// Public models in /models take precedence on a new visitor's first visit.
+loadSaved().then(async()=>{if(!state.saved.length && !state.local)await restoreLocalPreview()});
 getViewer().catch(()=>{});
