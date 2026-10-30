@@ -1,15 +1,12 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#f7f8f6" />
-  <meta name="description" content="Una galería de modelos tridimensionales para explorar en el navegador." />
-  <title>Archivo 3D · Galería de modelos</title>
-  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-  <link rel="preconnect" href="https://esm.sh" crossorigin />
-  <link rel="stylesheet" href="./src/style.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f7f7f5">
+  <title>RICOS · 3D VIEWER</title>
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./src/style.css">
   <script type="importmap">
   {
     "imports": {
@@ -21,131 +18,54 @@
   <script type="module" src="./src/main.js"></script>
 </head>
 <body>
-  <div class="app-shell">
-    <header class="topbar">
-      <a class="brand" href="./" aria-label="Archivo 3D, inicio">
-        <span class="brand-mark" aria-hidden="true">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linejoin="round"><path d="M12 2 21 7v10l-9 5-9-5V7l9-5Z"/><path d="m3 7 9 5 9-5M12 12v10"/></svg>
-        </span>
-        <span>ARCHIVO<span class="brand-light">3D</span></span>
-      </a>
-      <div class="header-right">
-        <span class="public-label"><span class="online-dot"></span> GALERÍA PÚBLICA</span>
-        <button class="btn btn-outline" id="loginBtn" type="button">Administrar</button>
-        <button class="btn btn-dark hidden" id="uploadBtn" type="button"><span aria-hidden="true">＋</span> Subir modelo</button>
-      </div>
-    </header>
-
-    <main class="page">
-      <div class="intro">
-        <div>
-          <div class="eyebrow"><span class="mini-line"></span> BIBLIOTECA DE FORMAS DIGITALES</div>
-          <h1>Explorá modelos<br /><em>en tres dimensiones.</em></h1>
-          <p>Un espacio para mirar cada detalle. Seleccioná un modelo, giralo y descubrilo desde cualquier ángulo.</p>
+  <main class="shell">
+    <aside class="library" aria-label="Biblioteca de modelos guardados">
+      <div class="library-top">
+        <div class="brand" aria-label="RICOS 3D">
+          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round" aria-hidden="true">
+            <path d="M16 3 28 10v13L16 30 4 23V10L16 3Z" />
+            <path d="M4 10 16 17l12-7M16 17v13" />
+          </svg>
         </div>
-        <div class="intro-index"><span>COLECCIÓN</span><strong id="heroCount">00</strong><small>modelos publicados</small></div>
+        <button type="button" class="load-button" id="loadButton">Cargar modelo local</button>
+        <input id="fileInput" type="file" accept=".glb,.obj,.stl" hidden>
       </div>
-
-      <div class="notice hidden" id="setupNotice" role="status">
-        <span class="notice-icon">i</span>
-        <span><strong>Modo de demostración.</strong> Podés probar archivos en tu navegador. Para que queden publicados para todos, configurá Supabase siguiendo el README.</span>
+      <div id="modelList" class="model-list" aria-live="polite"></div>
+      <div class="library-bottom"><span id="modelCounter" aria-label="Cantidad de modelos">00</span></div>
+    </aside>
+    <section class="view" id="view" aria-label="Visor 3D">
+      <div id="viewport" class="viewport"></div>
+      <div class="center-mark" id="centerMark" aria-hidden="true">
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M32 7 54 19.5v25L32 57 10 44.5v-25L32 7Z"/><path d="M10 19.5 32 32l22-12.5M32 32v25"/></svg>
       </div>
+      <div id="busy" class="busy" role="status" aria-live="polite" hidden><div class="loader"></div></div>
+      <button id="saveButton" type="button" class="save-button" title="Guardar modelo en GitHub" aria-label="Guardar modelo en GitHub" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 16V4m-4 4 4-4 4 4M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
+        </svg>
+      </button>
+      <div class="control-hint" id="controlHint" aria-hidden="true"></div>
+    </section>
+  </main>
 
-      <div class="workspace">
-        <aside class="sidebar" aria-label="Biblioteca de modelos">
-          <div class="section-top"><div><span class="section-kicker">BIBLIOTECA</span><h2>Todos los modelos <span id="sideCount" class="count-chip">0</span></h2></div></div>
-          <label class="search-box">
-            <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="11" cy="11" r="7.5"/><path d="m16.7 16.7 4 4"/></svg>
-            <input id="searchInput" type="search" placeholder="Buscar modelo..." autocomplete="off" aria-label="Buscar modelos" />
-            <kbd>/</kbd>
-          </label>
-          <div class="filter-row" role="group" aria-label="Filtrar formato">
-            <button class="filter active" data-filter="all" type="button">Todos</button>
-            <button class="filter" data-filter="glb" type="button">GLB</button>
-            <button class="filter" data-filter="obj" type="button">OBJ</button>
-            <button class="filter" data-filter="stl" type="button">STL</button>
-          </div>
-          <div id="modelList" class="model-list" aria-live="polite"></div>
-          <div class="sidebar-footer">
-            <span>¿Tenés un archivo para explorar?</span>
-            <button class="text-action" id="localPreviewBtn" type="button">Abrir un modelo local <span aria-hidden="true">↗</span></button>
-            <input type="file" id="localFileInput" accept=".glb,.obj,.stl" hidden />
-            <small>La vista previa local no publica el archivo.</small>
-          </div>
-        </aside>
-
-        <section class="viewer-panel" aria-label="Visor tridimensional">
-          <div class="viewer-head">
-            <div class="viewer-ident"><span class="viewer-bullet"></span><span id="viewerStatus">VISTA 3D EN TIEMPO REAL</span></div>
-            <span class="viewer-head-side">ORBIT / ZOOM / PAN</span>
-          </div>
-          <div class="viewer-stage" id="viewerStage">
-            <div id="viewerCanvas" class="viewer-canvas" aria-label="Visor 3D interactivo"></div>
-            <div class="stage-loader hidden" id="stageLoader" role="status"><span class="spinner"></span><span>Preparando modelo 3D...</span></div>
-            <div class="axis-label">X <span>·</span> Y <span>·</span> Z</div>
-            <div class="stage-indicator"><span class="ring-icon">◉</span> ARRASTRÁ PARA ROTAR</div>
-            <div class="stage-badge" id="stageBadge">VISTA PREVIA</div>
-          </div>
-          <div class="viewer-toolbar">
-            <div class="tool-left">
-              <button id="resetBtn" class="tool-button" type="button" title="Restablecer cámara"><span class="tool-icon">↺</span><span>Restablecer</span></button>
-              <button id="rotateBtn" class="tool-button" type="button" aria-pressed="false"><span class="tool-icon">◌</span><span>Giro automático</span></button>
-              <button id="gridBtn" class="tool-button" type="button" aria-pressed="false"><span class="tool-icon">▦</span><span>Cuadrícula</span></button>
-              <button id="wireBtn" class="tool-button" type="button" aria-pressed="false"><span class="tool-icon">◇</span><span>Alambres</span></button>
-            </div>
-            <button id="fullscreenBtn" class="tool-button fullscreen-button" type="button" title="Pantalla completa"><span class="tool-icon">⛶</span><span>Pantalla completa</span></button>
-          </div>
-          <div class="model-detail">
-            <div class="detail-main">
-              <span class="section-kicker" id="detailEyebrow">MODELO DE PRESENTACIÓN</span>
-              <h2 id="detailName">Tus modelos, en un solo lugar.</h2>
-              <p id="detailDescription">Cargá un archivo GLB, OBJ o STL para verlo en el visor. Una vez publicado, estará disponible para todas las personas que visiten la galería.</p>
-            </div>
-            <div class="detail-actions">
-              <div class="detail-stats"><div><span>FORMATO</span><strong id="detailFormat">3D</strong></div><div><span>TAMAÑO</span><strong id="detailSize">—</strong></div></div>
-              <div class="action-row">
-                <button id="copyBtn" class="btn btn-outline hidden" type="button">Copiar enlace</button>
-                <button id="deleteBtn" class="btn btn-danger hidden" type="button">Eliminar</button>
-              </div>
-            </div>
-          </div>
-        </section>
+  <dialog id="publishDialog" class="publish-dialog">
+    <form id="publishForm" class="publish-form">
+      <button type="button" class="modal-close" id="closeDialog" aria-label="Cerrar">×</button>
+      <div class="modal-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4m-4 4 4-4 4 4M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
       </div>
-      <footer class="footer"><span>ARCHIVO 3D © <span id="year"></span></span><span>UNA GALERÍA PARA EXPLORAR DESDE CUALQUIER ÁNGULO</span></footer>
-    </main>
-  </div>
-
-  <dialog id="authDialog" class="dialog">
-    <form id="authForm" class="modal-card">
-      <button class="close-btn" type="button" data-close="authDialog" aria-label="Cerrar">×</button>
-      <div class="modal-kicker">ACCESO RESTRINGIDO</div>
-      <h2>Ingresar como administrador</h2>
-      <p>Usá tu correo autorizado. Te llegará un enlace para entrar sin contraseña.</p>
-      <label class="field"><span>Correo electrónico</span><input id="authEmail" type="email" placeholder="tu@correo.com" required autocomplete="email" /></label>
-      <p id="authMessage" class="modal-message hidden" role="status"></p>
-      <button id="authSubmit" class="btn btn-dark btn-full" type="submit">Enviar enlace de acceso</button>
+      <h1>Guardar en GitHub</h1>
+      <p id="fileInfo"></p>
+      <label for="modelName">Nombre del modelo</label>
+      <input id="modelName" type="text" maxlength="80" required autocomplete="off">
+      <label for="accessToken">Token de GitHub</label>
+      <input id="accessToken" type="password" required autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+      <p class="token-hint">Usá un token temporal, limitado a este repositorio, con permiso <strong>Contents: Read and write</strong>. No se guarda en el sitio ni en el navegador.</p>
+      <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer" class="token-link">Crear token de acceso ↗</a>
+      <p id="publishError" class="publish-error" role="alert" hidden></p>
+      <button class="confirm-button" id="confirmPublish" type="submit">Guardar modelo</button>
     </form>
   </dialog>
-
-  <dialog id="uploadDialog" class="dialog">
-    <form id="uploadForm" class="modal-card" enctype="multipart/form-data">
-      <button class="close-btn" type="button" data-close="uploadDialog" aria-label="Cerrar">×</button>
-      <div class="modal-kicker">AGREGAR A LA COLECCIÓN</div>
-      <h2>Publicar modelo 3D</h2>
-      <p>Los archivos publicados aparecerán en la galería de todos los visitantes.</p>
-      <label class="file-zone" id="fileZone">
-        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m-4 4 4-4 4 4"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>
-        <strong id="fileZoneTitle">Elegir archivo 3D</strong>
-        <span id="fileZoneSubtitle">GLB, OBJ o STL · hasta 50 MB</span>
-        <input id="uploadFile" type="file" accept=".glb,.obj,.stl" required />
-      </label>
-      <label class="field"><span>Nombre del modelo</span><input id="uploadName" type="text" maxlength="120" placeholder="Ej.: Cartera Modelo 01" required /></label>
-      <label class="field"><span>Descripción (opcional)</span><textarea id="uploadDescription" rows="3" maxlength="500" placeholder="Un detalle sobre tu modelo..."></textarea></label>
-      <p id="uploadMessage" class="modal-message hidden" role="status"></p>
-      <button class="btn btn-dark btn-full" id="publishBtn" type="submit">Publicar en la galería <span aria-hidden="true">↗</span></button>
-    </form>
-  </dialog>
-
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>
