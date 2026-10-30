@@ -27,6 +27,8 @@ export function initialize(container) {
   controls.enableDamping = true;
   controls.dampingFactor = 0.075;
   controls.screenSpacePanning = true;
+  controls.autoRotate = false;
+  controls.autoRotateSpeed = 1.8;
   camera.position.set(2,1.4,3);
   controls.update();
   let current = null;
@@ -113,5 +115,8 @@ export function initialize(container) {
     if(current)dispose(current);
     current=null;
   }
-  return {open,clear};
+  function setAutoRotate(enabled) {
+    controls.autoRotate = Boolean(enabled);
+  }
+  return {open,clear,setAutoRotate};
 }
